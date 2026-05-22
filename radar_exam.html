@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radar Engineering - امتحان هندسة الرادار</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1a3e 50%, #0d1b2a 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .radar-bg {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            border: 2px solid rgba(0, 255, 136, 0.1);
+            opacity: 0.3;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .radar-bg::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 50%;
+            height: 2px;
+            background: linear-gradient(90deg, rgba(0,255,136,0.5), transparent);
+            transform-origin: left center;
+            animation: radarSweep 4s linear infinite;
+        }
+
+        .radar-bg::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 255, 136, 0.1);
+        }
+
+        @keyframes radarSweep {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 100, 255, 0.1));
+            border-radius: 20px;
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 900;
+            background: linear-gradient(135deg, #00ff88, #00aaff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            color: #8899aa;
+        }
+
+        .header .exam-info {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .header .exam-info span {
+            background: rgba(0, 255, 136, 0.1);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            color: #00ff88;
+            border: 1px solid rgba(0, 255, 136, 0.2);
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 12px 25px;
+            border: 2px solid rgba(0, 255, 136, 0.3);
+            background: rgba(0, 0, 0, 0.3);
+            color: #aaa;
+            border-radius: 12px;
+            cursor: pointer;
+            font-family: 'Cairo', sans-serif;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .tab-btn:hover {
+            border-color: #00ff88;
+            color: #00ff88;
+            background: rgba(0, 255, 136, 0.1);
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #00ff88, #00aaff);
+            color: #0a0e27;
+            border-color: transparent;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Explanation Section */
+        .explanation-section {
+            margin-bottom: 25px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+        }
+
+        .explanation-header {
+            padding: 15px 20px;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.15), rgba(0, 100, 255, 0.15));
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s;
+        }
+
+        .explanation-header:hover {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.25), rgba(0, 100, 255, 0.25));
+        }
+
+        .explanation-header h3 {
+            font-size: 1.05em;
+            color: #00ff88;
+        }
+
+        .explanation-header .arrow {
+            font-size: 1.2em;
+            transition: transform 0.3s;
+            color: #00ff88;
+        }
+
+        .explanation-header.open .arrow {
+            transform: rotate(180deg);
+        }
+
+        .explanation-body {
+            padding: 0 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.4s ease;
+        }
+
+        .explanation-body.open {
+            padding: 20px;
+            max-height: 2000px;
+        }
+
+        .explanation-body .question-text {
+            font-size: 1.05em;
+            color: #fff;
+            margin-bottom: 12px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            border-right: 4px solid #00aaff;
+        }
+
+        .explanation-body .answer-box {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 12px;
+        }
+
+        .explanation-body .answer-box .correct-label {
+            color: #00ff88;
+            font-weight: 700;
+            font-size: 1em;
+            margin-bottom: 5px;
+        }
+
+        .explanation-body .explain-text {
+            background: rgba(0, 100, 255, 0.1);
+            border: 1px solid rgba(0, 100, 255, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            color: #ccddef;
+            line-height: 1.8;
+        }
+
+        .explanation-body .explain-text strong {
+            color: #00aaff;
+        }
+
+        /* Quiz Section */
+        .quiz-controls {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .start-btn {
+            padding: 15px 50px;
+            background: linear-gradient(135deg, #00ff88, #00aaff);
+            color: #0a0e27;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 1.2em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.3);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff88, #00aaff);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #8899aa;
+            font-size: 0.95em;
+        }
+
+        .quiz-question {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .quiz-question.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .quiz-question h3 {
+            color: #fff;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        .quiz-question .q-number {
+            display: inline-block;
+            background: linear-gradient(135deg, #00ff88, #00aaff);
+            color: #0a0e27;
+            width: 35px;
+            height: 35px;
+            line-height: 35px;
+            text-align: center;
+            border-radius: 50%;
+            font-weight: 700;
+            margin-left: 10px;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            padding: 14px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1em;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .option:hover {
+            border-color: #00aaff;
+            background: rgba(0, 100, 255, 0.1);
+        }
+
+        .option.selected {
+            border-color: #00aaff;
+            background: rgba(0, 100, 255, 0.15);
+        }
+
+        .option.correct {
+            border-color: #00ff88 !important;
+            background: rgba(0, 255, 136, 0.15) !important;
+        }
+
+        .option.wrong {
+            border-color: #ff4444 !important;
+            background: rgba(255, 68, 68, 0.15) !important;
+        }
+
+        .option .option-letter {
+            width: 32px;
+            height: 32px;
+            line-height: 32px;
+            text-align: center;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            font-weight: 700;
+            color: #aaa;
+            flex-shrink: 0;
+        }
+
+        .option.correct .option-letter {
+            background: #00ff88;
+            color: #0a0e27;
+        }
+
+        .option.wrong .option-letter {
+            background: #ff4444;
+            color: #fff;
+        }
+
+        .quiz-nav {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            padding: 12px 30px;
+            border: 2px solid rgba(0, 255, 136, 0.3);
+            background: rgba(0, 0, 0, 0.3);
+            color: #00ff88;
+            border-radius: 10px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: rgba(0, 255, 136, 0.15);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .nav-btn.submit-btn {
+            background: linear-gradient(135deg, #00ff88, #00aaff);
+            color: #0a0e27;
+            border: none;
+        }
+
+        .quiz-feedback {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+            line-height: 1.8;
+        }
+
+        .quiz-feedback.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .quiz-feedback.correct-feedback {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            color: #00ff88;
+        }
+
+        .quiz-feedback.wrong-feedback {
+            background: rgba(255, 68, 68, 0.1);
+            border: 1px solid rgba(255, 68, 68, 0.3);
+            color: #ff8888;
+        }
+
+        /* Results */
+        .results-container {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .results-container.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .score-circle {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            margin: 0 auto 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+            font-weight: 900;
+            position: relative;
+        }
+
+        .score-circle.excellent {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 200, 100, 0.1));
+            border: 4px solid #00ff88;
+            color: #00ff88;
+        }
+
+        .score-circle.good {
+            background: linear-gradient(135deg, rgba(0, 170, 255, 0.2), rgba(0, 100, 255, 0.1));
+            border: 4px solid #00aaff;
+            color: #00aaff;
+        }
+
+        .score-circle.average {
+            background: linear-gradient(135deg, rgba(255, 170, 0, 0.2), rgba(255, 136, 0, 0.1));
+            border: 4px solid #ffaa00;
+            color: #ffaa00;
+        }
+
+        .score-circle.poor {
+            background: linear-gradient(135deg, rgba(255, 68, 68, 0.2), rgba(255, 0, 0, 0.1));
+            border: 4px solid #ff4444;
+            color: #ff4444;
+        }
+
+        .score-circle small {
+            font-size: 0.35em;
+            color: #aaa;
+        }
+
+        .results-message {
+            font-size: 1.5em;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .results-details {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .result-stat {
+            padding: 15px 25px;
+            border-radius: 12px;
+            min-width: 120px;
+        }
+
+        .result-stat.correct-stat {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+        }
+
+        .result-stat.wrong-stat {
+            background: rgba(255, 68, 68, 0.1);
+            border: 1px solid rgba(255, 68, 68, 0.3);
+        }
+
+        .result-stat .stat-num {
+            font-size: 2em;
+            font-weight: 900;
+        }
+
+        .result-stat.correct-stat .stat-num { color: #00ff88; }
+        .result-stat.wrong-stat .stat-num { color: #ff4444; }
+
+        .result-stat .stat-label {
+            font-size: 0.9em;
+            color: #aaa;
+        }
+
+        .retry-btn {
+            margin-top: 25px;
+            padding: 12px 40px;
+            background: linear-gradient(135deg, #00ff88, #00aaff);
+            color: #0a0e27;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .retry-btn:hover {
+            transform: translateY(-3px);
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 1.6em;
+            font-weight: 700;
+            color: #00ff88;
+            margin: 30px 0 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(0, 255, 136, 0.2);
+        }
+
+        .timer {
+            text-align: center;
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #00aaff;
+            margin-bottom: 20px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 { font-size: 1.6em; }
+            .container { padding: 10px; }
+            .quiz-question { padding: 15px; }
+            .tabs { gap: 5px; }
+            .tab-btn { padding: 8px 15px; font-size: 0.85em; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="radar-bg"></div>
+
+<div class="container">
+    <div class="header">
+        <h1>Radar Engineering Exam</h1>
+        <p>امتحان هندسة الرادار - شرح تفصيلي + اختبار تفاعلي</p>
+        <div class="exam-info">
+            <span>ECE334</span>
+            <span>Delta University</span>
+            <span>Spring 2024-2025</span>
+            <span>45 سؤال</span>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('explanations')">الشرح والتوضيح</button>
+        <button class="tab-btn" onclick="switchTab('quiz')">ابدأ الامتحان</button>
+        <button class="tab-btn" onclick="switchTab('final-review')">مراجعة الفاينال</button>
+    </div>
+
+    <!-- ===================== EXPLANATIONS TAB ===================== -->
+    <div id="tab-explanations" class="tab-content active">
+        <div class="section-title">Sheet 1 - أساسيات الرادار (20 سؤال)</div>
+
+        <div id="explanations-container"></div>
+
+        <div class="section-title">Sheet 5 - رادار MTI & Pulse Doppler (10 أسئلة)</div>
+
+        <div id="explanations-container-2"></div>
+
+        <div class="section-title">أسئلة الفاينال MCQ (15 سؤال)</div>
+
+        <div id="explanations-container-3"></div>
+    </div>
+
+    <!-- ===================== QUIZ TAB ===================== -->
+    <div id="tab-quiz" class="tab-content">
+        <div class="quiz-controls" id="quiz-start-screen">
+            <p style="margin-bottom:20px; color:#aaa; font-size:1.1em;">الامتحان يحتوي على 45 سؤال اختياري من كل الشيتات والفاينال<br>اختار الإجابة الصحيحة وفي الآخر هيظهرلك الدرجة</p>
+            <button class="start-btn" onclick="startQuiz()">ابدأ الامتحان الآن</button>
+        </div>
+
+        <div id="quiz-area" style="display:none;">
+            <div class="timer" id="timer">00:00</div>
+            <div class="progress-text" id="progress-text"></div>
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            <div id="quiz-questions-container"></div>
+            <div class="results-container" id="results-container"></div>
+        </div>
+    </div>
+
+    <!-- ===================== FINAL REVIEW TAB ===================== -->
+    <div id="tab-final-review" class="tab-content">
+        <div class="section-title">مراجعة أسئلة الفاينال المقالية + الحل النموذجي</div>
+
+        <!-- Q2a -->
+        <div class="explanation-section">
+            <div class="explanation-header" onclick="toggleExplanation(this)">
+                <h3>Q2-a: اشتقاق معادلة Doppler Shift للرادار (5 درجات)</h3>
+                <span class="arrow">&#9660;</span>
+            </div>
+            <div class="explanation-body">
+                <div class="explain-text">
+                    <strong>المطلوب:</strong> اشتق معادلة الإزاحة الدوبلرية (Doppler Shift) للرادار.
+                    <br><br>
+                    <strong>الحل:</strong>
+                    <br>
+                    نبدأ بالموجة الكهرومغناطيسية المرسلة:
+                    <br>
+                    E(r,t) = E₀ × e^(j(ωt - kr))
+                    <br>
+                    حيث k = 2π/λ هو ثابت الانتشار (Propagation Constant)
+                    <br><br>
+                    في اتجاه x:
+                    <br>
+                    E(x,t) = E₀ × cos(2πf₀t - (2πf₀/c)x)
+                    <br><br>
+                    المسافة الكلية للإشارة = 2R (ذهاب وعودة)
+                    <br><br>
+                    التردد المستقبل fR = (1/2π)(dθ/dt)
+                    <br>
+                    fR = f₀(1 - 2v/c) = f₀ - 2vf₀/c
+                    <br><br>
+                    <strong>المعادلة النهائية:</strong>
+                    <br>
+                    <strong style="font-size:1.2em; color:#00ff88;">f_R = f₀ ± 2v/λ</strong>
+                    <br><br>
+                    - علامة (-) لما الهدف بيبعد عن الرادار
+                    <br>
+                    - علامة (+) لما الهدف بيقرب من الرادار
+                    <br>
+                    - fd = 2v/λ = 2vf₀/c هي الإزاحة الدوبلرية
+                </div>
+            </div>
+        </div>
+
+        <!-- Q2b -->
+        <div class="explanation-section">
+            <div class="explanation-header" onclick="toggleExplanation(this)">
+                <h3>Q2-b: معادلة مدى الرادار (Radar Range Equation) (4 درجات)</h3>
+                <span class="arrow">&#9660;</span>
+            </div>
+            <div class="explanation-body">
+                <div class="explain-text">
+                    <strong>الخطوات:</strong>
+                    <br><br>
+                    1. <strong>Isotropic radiation:</strong> كثافة القدرة عند مسافة R:
+                    <br>P_di = P_t / (4πR²)
+                    <br><br>
+                    2. <strong>Directive Antenna:</strong> مع كسب الهوائي G:
+                    <br>P_dd = P_t × G / (4πR²)
+                    <br><br>
+                    3. <strong>Target Interception:</strong> القدرة المعترضة بواسطة الهدف (حسب RCS σ):
+                    <br>P_de = P_dd × σ / (4πR²)
+                    <br><br>
+                    4. <strong>Return Power:</strong> القدرة المستقبلة عند الرادار:
+                    <br>P_r = P_de × A_e
+                    <br><br>
+                    <strong>المعادلة النهائية:</strong>
+                    <br>
+                    <strong style="font-size:1.2em; color:#00ff88;">R_max = [P_t × G² × λ² × σ / ((4π)³ × S_min)]^(1/4)</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Q2c -->
+        <div class="explanation-section">
+            <div class="explanation-header" onclick="toggleExplanation(this)">
+                <h3>Q2-c: حساب Maximum Unambiguous Range لثلاث PRFs (6 درجات)</h3>
+                <span class="arrow">&#9660;</span>
+            </div>
+            <div class="explanation-body">
+                <div class="explain-text">
+                    <strong>المعادلة:</strong> R_unamb = c / (2 × PRF) حيث c = 3×10⁸ m/s
+                    <br><br>
+                    <strong>Mode 1: PRF = 500 Hz</strong>
+                    <br>R = 3×10⁸ / (2×500) = 3×10⁸ / 1000 = <strong style="color:#00ff88;">300 km</strong>
+                    <br><br>
+                    <strong>Mode 2: PRF = 2000 Hz</strong>
+                    <br>R = 3×10⁸ / (2×2000) = 3×10⁸ / 4000 = <strong style="color:#00ff88;">75 km</strong>
+                    <br><br>
+                    <strong>Mode 3: PRF = 5000 Hz</strong>
+                    <br>R = 3×10⁸ / (2×5000) = 3×10⁸ / 10000 = <strong style="color:#00ff88;">30 km</strong>
+                    <br><br>
+                    <strong>المخاطر التشغيلية عند التبديل بين الأوضاع:</strong>
+                    <br>- Range ambiguity عند PRFs العالية
+                    <br>- Doppler ambiguity
+                    <br>- Trade-offs في SNR ودقة التتبع
+                    <br>- تعقيد المعالجة واحتمال فقدان استمرارية التتبع
+                </div>
+            </div>
+        </div>
+
+        <!-- Q3a -->
+        <div class="explanation-section">
+            <div class="explanation-header" onclick="toggleExplanation(this)">
+                <h3>Q3-a: حساب Doppler Frequency Shift و Phase Shift (5 درجات)</h3>
+                <span class="arrow">&#9660;</span>
+            </div>
+            <div class="explanation-body">
+                <div class="explain-text">
+                    <strong>المعطيات:</strong>
+                    <br>f_c = 10 GHz, v = 150 m/s, c = 3×10⁸ m/s, PRI = 1 ms
+                    <br><br>
+                    <strong>الخطوة 1: حساب Doppler Frequency Shift:</strong>
+                    <br>f_d = 2v × f_c / c = (2 × 150 × 10×10⁹) / (3×10⁸)
+                    <br><strong style="color:#00ff88;">f_d = 10,000 Hz = 10 kHz</strong>
+                    <br><br>
+                    <strong>الخطوة 2: حساب Phase Shift:</strong>
+                    <br>Φ = 2π × f_d × PRI = 2π × 10000 × 1×10⁻³
+                    <br><strong style="color:#00ff88;">Φ = 20π radians</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Q3b -->
+        <div class="explanation-section">
+            <div class="explanation-header" onclick="toggleExplanation(this)">
+                <h3>Q3-b: حساب زاوية التوجيه لـ Phased Array (2 درجات)</h3>
+                <span class="arrow">&#9660;</span>
+            </div>
+            <div class="explanation-body">
+                <div class="explain-text">
+                    <strong>المعطيات:</strong>
+                    <br>N = 8 عناصر, d = λ/2, α = -2π/λ
+                    <br>β = -kd×cos(θ), k = 2π/λ
+                    <br><br>
+                    <strong>الحل:</strong>
+                    <br>α = (-2π/λ) × d = (-2π/λ) × (λ/2) = -π radians
+                    <br><br>
+                    β = α → -kd×cos(θ) = -π
+                    <br>-(2π/λ)(λ/2)cos(θ) = -π
+                    <br>-π×cos(θ) = -π
+                    <br>cos(θ) = 1
+                    <br><br>
+                    <strong style="color:#00ff88; font-size:1.2em;">θ = 0° (broadside)</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Q3c -->
+        <div class="explanation-section">
+            <div class="explanation-header" onclick="toggleExplanation(this)">
+                <h3>Q3-c: MTI Radar Block Diagram مع Power Amplifier (3 درجات)</h3>
+                <span class="arrow">&#9660;</span>
+            </div>
+            <div class="explanation-body">
+                <div class="explain-text">
+                    <strong>المكونات الأساسية في رادار MTI اللي بيستخدم Power Amplifier:</strong>
+                    <br><br>
+                    1. <strong>Pulse Modulator:</strong> بيتحكم في توقيت النبضات المرسلة
+                    <br>
+                    2. <strong>Power Amplifier:</strong> بيضخم الإشارة قبل الإرسال (التردد = f_l + f_c)
+                    <br>
+                    3. <strong>Duplexer:</strong> بيبدل بين الإرسال والاستقبال على نفس الهوائي
+                    <br>
+                    4. <strong>Stalo (Stable Local Oscillator):</strong> بيولد تردد مرجعي ثابت f_l - بيتصل بالـ Mixer في الإرسال والاستقبال
+                    <br>
+                    5. <strong>Mixer (إرسال):</strong> بيجمع تردد Stalo مع Coho لتوليد f_l + f_c
+                    <br>
+                    6. <strong>Mixer (استقبال):</strong> بيحول الإشارة المستقبلة (f_l + f_c ± f_d) إلى IF (f_c ± f_d)
+                    <br>
+                    7. <strong>IF Amplifier:</strong> بيضخم إشارة الـ IF
+                    <br>
+                    8. <strong>Coho (Coherent Oscillator):</strong> بيوفر إشارة مرجعية coherent عند التردد f_c
+                    <br>
+                    9. <strong>Phase Detector:</strong> بيقارن الإشارة المستقبلة مع إشارة Coho المرجعية - الخرج = f_d
+                    <br>
+                    10. <strong>Delay-Line Canceler:</strong> بيلغي إشارات الـ Clutter الثابتة ويمرر إشارات الأهداف المتحركة
+                    <br><br>
+                    <strong>الميزة الأساسية:</strong> استخدام Power Amplifier بدل Power Oscillator بيحافظ على الـ Coherence لأن الإشارة المرجعية بتيجي من Stalo و Coho مش من المذبذب نفسه.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ==================== DATA ====================
+const sheet1Questions = [
+    {
+        q: "What does RADAR stand for?",
+        opts: ["Radio Detection and Ranging", "Radio Distance and Reflection", "Reflection Analysis and Detection", "Ranging Detection and Analysis"],
+        ans: 0,
+        explain: "RADAR هو اختصار لـ Radio Detection and Ranging - يعني الكشف وتحديد المدى باستخدام موجات الراديو. الرادار بيرسل إشارات كهرومغناطيسية وبيستقبل الانعكاسات من الأهداف علشان يحدد مكانها وسرعتها ومسافتها."
+    },
+    {
+        q: "Which component of a radar system generates high-power signals for transmission?",
+        opts: ["Antenna", "Transmitter", "Receiver", "Display Unit"],
+        ans: 1,
+        explain: "الـ Transmitter (المرسل) هو اللي بيولد إشارات عالية القدرة علشان تتبعت عبر الهوائي. بيستخدم أجهزة زي Magnetron أو Klystron لتوليد نبضات ميكروويف قوية."
+    },
+    {
+        q: "What is the main function of the duplexer in a radar system?",
+        opts: ["Amplify weak signals", "Extract information", "Switch between transmitting and receiving", "Process signals"],
+        ans: 2,
+        explain: "الـ Duplexer بيعمل كمفتاح تبديل بين الإرسال والاستقبال. بيسمح للرادار يستخدم نفس الهوائي للإرسال والاستقبال. أثناء الإرسال بيوصل الهوائي بالمرسل، وأثناء الاستقبال بيوصله بالمستقبل ويحمي المستقبل من القدرة العالية."
+    },
+    {
+        q: "Which radar frequency band is commonly used for weather monitoring?",
+        opts: ["L-band", "X-band", "Ka-band", "C-band"],
+        ans: 3,
+        explain: "الـ C-band (4-8 GHz) هو الأكثر استخداماً في رصد الطقس والأرصاد الجوية. بيوفر توازن جيد بين الدقة والمدى، وبيقدر يكشف المطر والعواصف بدون توهين كبير."
+    },
+    {
+        q: "What does atmospheric attenuation primarily affect in radar systems?",
+        opts: ["Antenna placement", "Signal strength", "Processing algorithms", "Range resolution"],
+        ans: 1,
+        explain: "التوهين الجوي (Atmospheric Attenuation) بيأثر بشكل أساسي على قوة الإشارة (Signal Strength). الغلاف الجوي بيمتص ويشتت الإشارة أثناء انتقالها، وده بيقلل من القدرة المستقبلة وبالتالي بيقلل مدى الرادار."
+    },
+    {
+        q: "What is the primary purpose of the signal processor in radar?",
+        opts: ["Amplify signals", "Display data", "Extract useful information", "Generate high-power signals"],
+        ans: 2,
+        explain: "معالج الإشارة (Signal Processor) وظيفته الأساسية هي استخلاص المعلومات المفيدة من الإشارات المستقبلة. بيعمل فلترة وتحليل للإشارات علشان يحدد مواقع وسرعات الأهداف ويفصلها عن الضوضاء والـ Clutter."
+    },
+    {
+        q: "Over-the-horizon diffraction in radar is caused by:",
+        opts: ["Atmospheric refraction", "Earth's curvature", "Atmospheric attenuation", "Multipath reflection"],
+        ans: 1,
+        explain: "الحيود خلف الأفق (Over-the-horizon diffraction) بيحصل بسبب انحناء الأرض (Earth's curvature). الأرض كروية الشكل فالإشارات بتنحني حول سطحها. ده مختلف عن الانكسار الجوي اللي بيحصل بسبب تغير كثافة الغلاف الجوي."
+    },
+    {
+        q: "Which component is responsible for visualizing the radar data?",
+        opts: ["Signal Processor", "Receiver", "Display Unit", "Transmitter"],
+        ans: 2,
+        explain: "وحدة العرض (Display Unit) هي المسؤولة عن عرض بيانات الرادار بصرياً. بتحول البيانات المعالجة لصورة مرئية يقدر المشغل يفهمها - زي شاشة PPI اللي بتعرض الأهداف في شكل نقاط حول الرادار."
+    },
+    {
+        q: "Which frequency band is ideal for long-range surveillance?",
+        opts: ["S-band", "L-band", "X-band", "Ka-band"],
+        ans: 1,
+        explain: "الـ L-band (1-2 GHz) مثالي للمراقبة بعيدة المدى. الترددات المنخفضة بتتعرض لتوهين أقل في الغلاف الجوي وبتقدر توصل لمسافات أبعد. بيستخدم في رادارات مراقبة الحركة الجوية بعيدة المدى."
+    },
+    {
+        q: "Atmospheric refraction affects radar signals by:",
+        opts: ["Absorbing the signal", "Bending the signal", "Blocking the signal", "Amplifying the signal"],
+        ans: 1,
+        explain: "الانكسار الجوي (Atmospheric Refraction) بيأثر على إشارات الرادار عن طريق ثني الإشارة (Bending). ده بيحصل لأن كثافة الهواء بتتغير مع الارتفاع، وده بيخلي سرعة الإشارة تتغير فتنحني. أحياناً ده بيزود مدى الرادار عن الطبيعي."
+    },
+    {
+        q: "What type of target information can radar systems determine?",
+        opts: ["Shape only", "Speed and range only", "Speed, range, and direction", "Position only"],
+        ans: 2,
+        explain: "أنظمة الرادار تقدر تحدد السرعة (Speed) باستخدام تأثير دوبلر، والمسافة (Range) من وقت رحلة الإشارة، والاتجاه (Direction) من اتجاه الهوائي. ده بيخلي الرادار أداة قوية جداً للمراقبة."
+    },
+    {
+        q: "Which radar frequency band is commonly used for airport surveillance?",
+        opts: ["C-band", "S-band", "X-band", "Ku-band"],
+        ans: 1,
+        explain: "الـ S-band (2-4 GHz) بيستخدم بكثرة في مراقبة المطارات. بيوفر مدى كويس وتأثره بالأحوال الجوية أقل من الترددات العالية. رادارات مراقبة الحركة الجوية في المطارات (ASR) غالباً بتشتغل على S-band."
+    },
+    {
+        q: "What is the purpose of the receiver in radar systems?",
+        opts: ["Display target data", "Process weak reflected signals", "Generate signals", "Amplify transmitted signals"],
+        ans: 1,
+        explain: "المستقبل (Receiver) وظيفته معالجة الإشارات الضعيفة المنعكسة من الأهداف. بيضخم الإشارات المستقبلة (اللي بتكون ضعيفة جداً) وبيحولها لشكل مناسب للمعالجة. بيستخدم Low Noise Amplifier (LNA) علشان ميزودش الضوضاء."
+    },
+    {
+        q: "What limits the range resolution of radar?",
+        opts: ["Signal power", "Pulse width", "Duplexer type", "Antenna gain"],
+        ans: 1,
+        explain: "عرض النبضة (Pulse Width) هو اللي بيحدد دقة المدى (Range Resolution). الدقة = c×τ/2 حيث τ هو عرض النبضة. كل ما النبضة أضيق، كل ما الرادار يقدر يفرق بين هدفين قريبين من بعض."
+    },
+    {
+        q: "Which radar band operates in the frequency range 26.5-40 GHz?",
+        opts: ["X-band", "L-band", "Ka-band", "Ku-band"],
+        ans: 2,
+        explain: "الـ Ka-band بيشتغل في نطاق التردد 26.5-40 GHz. ده من أعلى نطاقات الرادار وبيوفر دقة عالية جداً لكن بيتأثر بالتوهين الجوي بشكل كبير. بيستخدم في تطبيقات المسافات القصيرة عالية الدقة."
+    },
+    {
+        q: "The term 'multipath reflection' refers to:",
+        opts: ["Signals reflecting off multiple objects", "Signal bending due to the atmosphere", "Signal reflection from Earth's surface", "Signal scattering due to interference"],
+        ans: 0,
+        explain: "الانعكاس متعدد المسارات (Multipath Reflection) معناه إن الإشارة بتنعكس من أكتر من جسم قبل ما ترجع للرادار. ده بيسبب إشارات وهمية وأخطاء في تحديد الموقع لأن الإشارة بتوصل عبر مسارات مختلفة بأزمنة مختلفة."
+    },
+    {
+        q: "Which type of radar is most suitable for detecting stealth aircraft?",
+        opts: ["High-frequency radar", "Low-frequency radar", "Weather radar", "Ground-penetrating radar"],
+        ans: 1,
+        explain: "الرادار منخفض التردد (Low-frequency radar) هو الأنسب لكشف طائرات الشبح. الطائرات الشبحية مصممة لامتصاص وتشتيت الترددات العالية، لكن الترددات المنخفضة (طول موجة أكبر) بتقدر تتفاعل مع الهيكل الكلي للطائرة فيصعب إخفاؤها."
+    },
+    {
+        q: "What is a key advantage of X-band radar?",
+        opts: ["Low cost", "Long range", "High resolution", "Low attenuation"],
+        ans: 2,
+        explain: "الميزة الأساسية لرادار X-band (8-12 GHz) هي الدقة العالية (High Resolution). التردد العالي بيسمح باستخدام هوائيات أصغر مع دقة أعلى. بيستخدم في التصوير الراداري والملاحة البحرية ورادارات الطيران."
+    },
+    {
+        q: "Radar can determine an object's speed using:",
+        opts: ["Pulse width", "Doppler effect", "Signal attenuation", "Multipath effect"],
+        ans: 1,
+        explain: "الرادار بيحدد سرعة الأجسام باستخدام تأثير دوبلر (Doppler Effect). لما هدف متحرك بيعكس إشارة الرادار، تردد الإشارة المنعكسة بيتغير. الفرق في التردد (fd = 2v/λ) بيستخدم لحساب السرعة."
+    },
+    {
+        q: "What does the term 'range resolution' in radar refer to?",
+        opts: ["The maximum range of detection", "The ability to distinguish two close objects", "The accuracy of speed measurement", "The strength of the received signal"],
+        ans: 1,
+        explain: "دقة المدى (Range Resolution) هي قدرة الرادار على التمييز بين هدفين قريبين من بعض في المسافة. بتعتمد على عرض النبضة: ΔR = cτ/2. كل ما النبضة أقصر، كل ما نقدر نفرق بين أهداف أقرب."
+    }
+];
+
+const sheet5Questions = [
+    {
+        q: "What is the main purpose of an MTI radar system?",
+        opts: ["Detect stationary targets", "Enhance signal strength", "Detect moving targets by exploiting Doppler shift", "Minimize signal interference"],
+        ans: 2,
+        explain: "رادار MTI (Moving Target Indicator) هدفه الأساسي هو كشف الأهداف المتحركة عن طريق استغلال الإزاحة الدوبلرية. بيلغي إشارات الأهداف الثابتة (Clutter) ويبقي بس إشارات الأهداف المتحركة."
+    },
+    {
+        q: "Which component in an MTI radar is responsible for signal coherence?",
+        opts: ["Power amplifier", "Stalo", "Mixer", "Antenna"],
+        ans: 1,
+        explain: "الـ Stalo (Stable Local Oscillator) هو المسؤول عن الترابط (Coherence) في إشارات رادار MTI. بيولد تردد مرجعي ثابت ومستقر اللي بيستخدم كمرجع للمقارنة مع الإشارات المستقبلة لاستخراج معلومات الدوبلر."
+    },
+    {
+        q: "What is the main function of a delay-line canceler in an MTI radar system?",
+        opts: ["Amplify Doppler signals", "Filter high-frequency noise", "Act as a high-pass filter to separate moving target echoes", "Suppress moving target echoes"],
+        ans: 2,
+        explain: "الـ Delay-line canceler بيعمل كفلتر High-pass لفصل إشارات الأهداف المتحركة. بيقارن النبضة الحالية مع النبضة السابقة - الأهداف الثابتة بتلغي بعضها (لأن إشارتها مبتتغيرش) بينما إشارات الأهداف المتحركة بتبقى لأن الدوبلر بيغير الفاز."
+    },
+    {
+        q: "Which of the following best describes a pulse Doppler radar?",
+        opts: ["Operates at low PRF to avoid Doppler ambiguities", "Uses continuous wave signals only", "Operates at high PRF to avoid Doppler ambiguities", "Cannot detect moving targets"],
+        ans: 2,
+        explain: "رادار Pulse Doppler بيشتغل بـ PRF عالي (High PRF) علشان يتجنب الغموض في قياس الدوبلر (Doppler ambiguities). الـ PRF العالي بيخلي الرادار يقدر يقيس السرعة بدقة لكن بيسبب غموض في قياس المدى (Range ambiguities)."
+    },
+    {
+        q: "In an MTI system, what is the role of the Coho oscillator?",
+        opts: ["Generate high-frequency pulses", "Create a reference signal coherent with the transmitted signal", "Detect clutter signals", "Amplify Doppler signals"],
+        ans: 1,
+        explain: "الـ Coho (Coherent Oscillator) بيولد إشارة مرجعية مترابطة (Coherent) مع الإشارة المرسلة. الإشارة دي بتستخدم في Phase Detector للمقارنة مع الإشارة المستقبلة واستخراج إزاحة الدوبلر."
+    },
+    {
+        q: "Why does a pulse Doppler radar experience range ambiguities?",
+        opts: ["Low pulse repetition frequency (PRF)", "High pulse repetition frequency (PRF)", "Unstable reference oscillator", "Strong clutter echoes"],
+        ans: 1,
+        explain: "رادار Pulse Doppler بيعاني من غموض المدى بسبب الـ PRF العالي. لما الـ PRF عالي، الوقت بين النبضات بيكون قصير، فالإشارة المنعكسة من هدف بعيد ممكن ترجع بعد إرسال نبضة جديدة، فالرادار مش بيعرف الإشارة دي لأي نبضة."
+    },
+    {
+        q: "Which signal processing technique helps remove stationary clutter echoes?",
+        opts: ["Phase detection", "Matched filtering", "Sweep-to-sweep subtraction", "Low-pass filtering"],
+        ans: 2,
+        explain: "تقنية Sweep-to-sweep subtraction (طرح نبضة من نبضة) بتساعد في إزالة إشارات الـ Clutter الثابتة. بنطرح الإشارة المستقبلة في النبضة الحالية من اللي في النبضة السابقة - الأهداف الثابتة بتلغي لأنها متشابهة، والمتحركة بتفضل."
+    },
+    {
+        q: "What type of signal is produced by an MTI radar after clutter cancellation?",
+        opts: ["Continuous wave", "Bipolar video signal", "Unipolar video signal", "Pulse modulated signal"],
+        ans: 1,
+        explain: "بعد إلغاء الـ Clutter في رادار MTI، الإشارة الناتجة هي Bipolar video signal (إشارة فيديو ثنائية القطب). ده لأن عملية الطرح ممكن تنتج قيم موجبة وسالبة. بعد كده بتتحول لـ Unipolar قبل العرض."
+    },
+    {
+        q: "Which parameter determines the maximum unambiguous range in an MTI radar system?",
+        opts: ["Doppler frequency", "Pulse width", "Pulse repetition frequency", "Oscillator stability"],
+        ans: 2,
+        explain: "تردد تكرار النبضة (PRF) هو اللي بيحدد أقصى مدى غير غامض. R_max = c/(2×PRF). كل ما الـ PRF أقل، كل ما المدى الأقصى أكبر لأن بيكون في وقت أطول للإشارة ترجع."
+    },
+    {
+        q: "An MTI radar system operates at 10 GHz with a target velocity of 150 m/s. The Doppler frequency shift is:",
+        opts: ["1 kHz", "10 kHz", "100 kHz", "5 kHz"],
+        ans: 1,
+        explain: "fd = 2vf/c = (2 × 150 × 10×10⁹)/(3×10⁸) = 10,000 Hz = 10 kHz. ده تطبيق مباشر لمعادلة الإزاحة الدوبلرية."
+    }
+];
+
+const finalQuestions = [
+    {
+        q: "Which radar band operates in the frequency range 26.5-40 GHz?",
+        opts: ["X-band", "L-band", "Ka-band", "Ku-band"],
+        ans: 2,
+        explain: "Ka-band بيشتغل في نطاق 26.5-40 GHz. (X-band: 8-12 GHz, L-band: 1-2 GHz, Ku-band: 12-18 GHz)"
+    },
+    {
+        q: "The term 'multipath reflection' refers to:",
+        opts: ["Signals reflecting off multiple objects", "Signal bending due to the atmosphere", "Signal reflection from Earth's surface", "Signal scattering due to interference"],
+        ans: 0,
+        explain: "الانعكاس متعدد المسارات = الإشارة بتنعكس من أكتر من جسم قبل ما ترجع للرادار."
+    },
+    {
+        q: "Which type of radar is most suitable for detecting stealth aircraft?",
+        opts: ["High-frequency radar", "Low-frequency radar", "Weather radar", "Ground-penetrating radar"],
+        ans: 1,
+        explain: "الرادار منخفض التردد (أطوال موجية كبيرة) بيكشف طائرات الشبح لأنها مصممة لامتصاص الترددات العالية فقط."
+    },
+    {
+        q: "What is a key advantage of X-band radar?",
+        opts: ["Low cost", "Long range", "High resolution", "Low attenuation"],
+        ans: 2,
+        explain: "X-band بيوفر دقة عالية (High Resolution) بسبب تردده العالي (8-12 GHz)."
+    },
+    {
+        q: "Radar can determine an object's speed using:",
+        opts: ["Pulse width", "Doppler effect", "Signal attenuation", "Multipath effect"],
+        ans: 1,
+        explain: "تأثير دوبلر: التغير في تردد الإشارة المنعكسة بيدينا سرعة الهدف (fd = 2v/λ)."
+    },
+    {
+        q: "What does the term 'range resolution' in radar refer to?",
+        opts: ["The maximum range of detection", "The ability to distinguish two close objects", "The accuracy of speed measurement", "The strength of the received signal"],
+        ans: 1,
+        explain: "Range Resolution = القدرة على التمييز بين هدفين قريبين. ΔR = cτ/2."
+    },
+    {
+        q: "What is the main purpose of an MTI radar system?",
+        opts: ["Detect stationary targets", "Enhance signal strength", "Detect moving targets by exploiting Doppler shift", "Minimize signal interference"],
+        ans: 2,
+        explain: "MTI = Moving Target Indicator - بيكشف الأهداف المتحركة باستخدام الإزاحة الدوبلرية."
+    },
+    {
+        q: "Which component in an MTI radar is responsible for signal coherence?",
+        opts: ["Power amplifier", "Stalo", "Mixer", "Antenna"],
+        ans: 1,
+        explain: "Stalo (Stable Local Oscillator) بيوفر الترابط (Coherence) اللي أساسي في قياس الدوبلر."
+    },
+    {
+        q: "Which parameter determines the maximum unambiguous range in an MTI radar system?",
+        opts: ["Doppler frequency", "Pulse width", "Pulse repetition frequency", "Oscillator stability"],
+        ans: 2,
+        explain: "PRF بيحدد R_max = c/(2×PRF). PRF منخفض = مدى أكبر."
+    },
+    {
+        q: "What is the main function of a delay-line canceler in an MTI radar system?",
+        opts: ["Amplify Doppler signals", "Filter high-frequency noise", "Act as a high-pass filter to separate moving target echoes", "Suppress moving target echoes"],
+        ans: 2,
+        explain: "Delay-line canceler = فلتر High-pass بيلغي Clutter الثابت ويمرر إشارات الأهداف المتحركة."
+    },
+    {
+        q: "Which of the following best describes a pulse Doppler radar?",
+        opts: ["Operates at low PRF to avoid Doppler ambiguities", "Uses continuous wave signals only", "Operates at high PRF to avoid Doppler ambiguities", "Cannot detect moving targets"],
+        ans: 2,
+        explain: "Pulse Doppler = PRF عالي لتجنب غموض الدوبلر (لكن بيعاني من غموض المدى)."
+    },
+    {
+        q: "In an MTI system, what is the role of the Coho oscillator?",
+        opts: ["Generate high-frequency pulses", "Create a reference signal coherent with the transmitted signal", "Detect clutter signals", "Amplify Doppler signals"],
+        ans: 1,
+        explain: "Coho = Coherent Oscillator بيولد إشارة مرجعية مترابطة مع الإشارة المرسلة."
+    },
+    {
+        q: "Why does a pulse Doppler radar experience range ambiguities?",
+        opts: ["Low PRF", "High PRF", "Unstable reference oscillator", "Strong clutter echoes"],
+        ans: 1,
+        explain: "PRF العالي = وقت قصير بين النبضات = الإشارة المنعكسة ممكن ترجع بعد النبضة التالية."
+    },
+    {
+        q: "Which signal processing technique helps remove stationary clutter echoes?",
+        opts: ["Phase detection", "Matched filtering", "Sweep-to-sweep subtraction", "Low-pass filtering"],
+        ans: 2,
+        explain: "Sweep-to-sweep subtraction: طرح نبضة من نبضة بيلغي الأهداف الثابتة ويبقي المتحركة."
+    },
+    {
+        q: "What type of signal is produced by an MTI radar after clutter cancellation?",
+        opts: ["Continuous wave", "Bipolar video signal", "Unipolar video signal", "Pulse modulated signal"],
+        ans: 1,
+        explain: "بعد الإلغاء الإشارة بتكون Bipolar (موجبة وسالبة) لأن عملية الطرح ممكن تنتج قيم سالبة."
+    }
+];
+
+const allQuestions = [...sheet1Questions, ...sheet5Questions, ...finalQuestions];
+
+// ==================== EXPLANATIONS ====================
+function buildExplanations() {
+    const c1 = document.getElementById('explanations-container');
+    const c2 = document.getElementById('explanations-container-2');
+    const c3 = document.getElementById('explanations-container-3');
+
+    sheet1Questions.forEach((q, i) => {
+        c1.appendChild(createExplanationCard(q, i + 1));
+    });
+    sheet5Questions.forEach((q, i) => {
+        c2.appendChild(createExplanationCard(q, i + 1));
+    });
+    finalQuestions.forEach((q, i) => {
+        c3.appendChild(createExplanationCard(q, i + 1));
+    });
+}
+
+function createExplanationCard(data, num) {
+    const letters = ['A', 'B', 'C', 'D'];
+    const section = document.createElement('div');
+    section.className = 'explanation-section';
+
+    section.innerHTML = `
+        <div class="explanation-header" onclick="toggleExplanation(this)">
+            <h3>${num}. ${data.q}</h3>
+            <span class="arrow">&#9660;</span>
+        </div>
+        <div class="explanation-body">
+            <div class="question-text">
+                ${data.opts.map((o, i) => `<div style="margin:5px 0; ${i === data.ans ? 'color:#00ff88; font-weight:700;' : ''}">${letters[i]}) ${o} ${i === data.ans ? ' ✓' : ''}</div>`).join('')}
+            </div>
+            <div class="answer-box">
+                <div class="correct-label">✓ الإجابة الصحيحة: ${letters[data.ans]}) ${data.opts[data.ans]}</div>
+            </div>
+            <div class="explain-text">
+                <strong>الشرح:</strong><br>${data.explain}
+            </div>
+        </div>
+    `;
+    return section;
+}
+
+function toggleExplanation(header) {
+    const body = header.nextElementSibling;
+    header.classList.toggle('open');
+    body.classList.toggle('open');
+}
+
+// ==================== TABS ====================
+function switchTab(tab) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+    event.target.classList.add('active');
+}
+
+// ==================== QUIZ ====================
+let currentQ = 0;
+let score = 0;
+let answers = [];
+let timerInterval;
+let seconds = 0;
+let quizStarted = false;
+
+function shuffleArray(arr) {
+    const shuffled = [...arr];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+}
+
+function startQuiz() {
+    currentQ = 0;
+    score = 0;
+    answers = new Array(allQuestions.length).fill(-1);
+    seconds = 0;
+    quizStarted = true;
+
+    document.getElementById('quiz-start-screen').style.display = 'none';
+    document.getElementById('quiz-area').style.display = 'block';
+    document.getElementById('results-container').classList.remove('show');
+
+    buildQuizQuestions();
+    showQuestion(0);
+    startTimer();
+}
+
+function buildQuizQuestions() {
+    const container = document.getElementById('quiz-questions-container');
+    container.innerHTML = '';
+    const letters = ['A', 'B', 'C', 'D'];
+
+    allQuestions.forEach((q, i) => {
+        const div = document.createElement('div');
+        div.className = 'quiz-question';
+        div.id = 'qq-' + i;
+
+        div.innerHTML = `
+            <h3><span class="q-number">${i + 1}</span> ${q.q}</h3>
+            <div class="options">
+                ${q.opts.map((o, j) => `
+                    <div class="option" id="opt-${i}-${j}" onclick="selectOption(${i}, ${j})">
+                        <span class="option-letter">${letters[j]}</span>
+                        <span>${o}</span>
+                    </div>
+                `).join('')}
+            </div>
+            <div class="quiz-feedback" id="feedback-${i}"></div>
+            <div class="quiz-nav">
+                <button class="nav-btn" onclick="prevQuestion()" ${i === 0 ? 'disabled' : ''}>السابق ←</button>
+                ${i === allQuestions.length - 1
+                    ? '<button class="nav-btn submit-btn" onclick="submitQuiz()">إظهار النتيجة</button>'
+                    : '<button class="nav-btn" onclick="nextQuestion()">→ التالي</button>'
+                }
+            </div>
+        `;
+        container.appendChild(div);
+    });
+}
+
+function showQuestion(index) {
+    document.querySelectorAll('.quiz-question').forEach(q => q.classList.remove('active'));
+    document.getElementById('qq-' + index).classList.add('active');
+    currentQ = index;
+    updateProgress();
+}
+
+function updateProgress() {
+    const answered = answers.filter(a => a !== -1).length;
+    const pct = (answered / allQuestions.length) * 100;
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-text').textContent = `سؤال ${currentQ + 1} من ${allQuestions.length} | تم الإجابة على ${answered} سؤال`;
+}
+
+function selectOption(qIndex, optIndex) {
+    const q = allQuestions[qIndex];
+
+    if (answers[qIndex] !== -1) return;
+    answers[qIndex] = optIndex;
+
+    for (let j = 0; j < q.opts.length; j++) {
+        const el = document.getElementById(`opt-${qIndex}-${j}`);
+        el.style.pointerEvents = 'none';
+        if (j === q.ans) {
+            el.classList.add('correct');
+        } else if (j === optIndex && j !== q.ans) {
+            el.classList.add('wrong');
+        }
+    }
+
+    const feedback = document.getElementById(`feedback-${qIndex}`);
+    if (optIndex === q.ans) {
+        score++;
+        feedback.className = 'quiz-feedback show correct-feedback';
+        feedback.innerHTML = '✓ إجابة صحيحة! ' + q.explain;
+    } else {
+        feedback.className = 'quiz-feedback show wrong-feedback';
+        feedback.innerHTML = '✗ إجابة خاطئة. ' + q.explain;
+    }
+
+    updateProgress();
+
+    if (currentQ < allQuestions.length - 1) {
+        setTimeout(() => nextQuestion(), 1500);
+    }
+}
+
+function nextQuestion() {
+    if (currentQ < allQuestions.length - 1) {
+        showQuestion(currentQ + 1);
+    }
+}
+
+function prevQuestion() {
+    if (currentQ > 0) {
+        showQuestion(currentQ - 1);
+    }
+}
+
+function startTimer() {
+    timerInterval = setInterval(() => {
+        seconds++;
+        const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+        const s = (seconds % 60).toString().padStart(2, '0');
+        document.getElementById('timer').textContent = m + ':' + s;
+    }, 1000);
+}
+
+function submitQuiz() {
+    clearInterval(timerInterval);
+    const unanswered = answers.filter(a => a === -1).length;
+    if (unanswered > 0) {
+        if (!confirm(`في ${unanswered} سؤال لسه مجاوبتش عليهم. عايز تنهي الامتحان؟`)) return;
+    }
+
+    document.querySelectorAll('.quiz-question').forEach(q => q.classList.remove('active'));
+
+    const pct = Math.round((score / allQuestions.length) * 100);
+    let scoreClass, message;
+    if (pct >= 85) { scoreClass = 'excellent'; message = 'ممتاز! أداء رائع 🎉'; }
+    else if (pct >= 70) { scoreClass = 'good'; message = 'جيد جداً! استمر 👏'; }
+    else if (pct >= 50) { scoreClass = 'average'; message = 'مقبول - تحتاج مراجعة أكتر 📖'; }
+    else { scoreClass = 'poor'; message = 'محتاج تذاكر أكتر 💪'; }
+
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+
+    const results = document.getElementById('results-container');
+    results.innerHTML = `
+        <div class="score-circle ${scoreClass}">
+            ${pct}%
+            <small>${score}/${allQuestions.length}</small>
+        </div>
+        <div class="results-message" style="color: ${scoreClass === 'excellent' ? '#00ff88' : scoreClass === 'good' ? '#00aaff' : scoreClass === 'average' ? '#ffaa00' : '#ff4444'}">${message}</div>
+        <p style="color:#aaa;">الوقت المستغرق: ${m} دقيقة و ${s} ثانية</p>
+        <div class="results-details">
+            <div class="result-stat correct-stat">
+                <div class="stat-num">${score}</div>
+                <div class="stat-label">إجابة صحيحة</div>
+            </div>
+            <div class="result-stat wrong-stat">
+                <div class="stat-num">${allQuestions.length - score}</div>
+                <div class="stat-label">إجابة خاطئة</div>
+            </div>
+        </div>
+        <button class="retry-btn" onclick="startQuiz()">أعد الامتحان</button>
+        <button class="retry-btn" style="background: rgba(255,255,255,0.1); color: #00ff88; margin-right: 10px;" onclick="reviewAnswers()">مراجعة الإجابات</button>
+    `;
+    results.classList.add('show');
+}
+
+function reviewAnswers() {
+    document.getElementById('results-container').classList.remove('show');
+    document.querySelectorAll('.quiz-question').forEach(q => {
+        q.classList.add('active');
+        q.style.display = 'block';
+    });
+}
+
+// ==================== INIT ====================
+buildExplanations();
+</script>
+
+</body>
+</html>
